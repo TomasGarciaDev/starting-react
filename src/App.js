@@ -81,51 +81,72 @@ const Input = styled.input`
   font-size: 1.5rem;
 `;
 
-function App() {
-  const [filter, setFilter] = useState("");
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [pokemon, setPokemon] = useState([]);
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {  
+      filter: "",
+      pokemon: [],
+      selectedItem: null,
+    }
+  }
 
-  useEffect(() => {
-    fetch("http://localhost:3000/starting-react/pokemon.json").then((res) => res.json()).then((data) => setPokemon(data));
-  }, []);
+  componentDidMount() {
+    fetch("http://localhost:3000/starting-react/pokemon.json")
+      .then((res) => res.json())
+      .then((pokemon) => this.setState({
+        ...this.state,
+        pokemon,
+      }));
+  }
 
-  return (
-    <Container
-    >
-      <Title Title>Pokemon Search</Title>
-      <TwoColumnLayout>
-        <div>
-        <Input value={filter} onChange={(e) => setFilter(e.target.value)} />
-          <table width="100%">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pokemon
-                .filter((pokemon) =>
-                  pokemon.name.english
-                    .toLowerCase()
-                    .includes(filter.toLocaleLowerCase())
-                )
-                .slice(0, 20)
-                .map((pokemon) => (
-                  <PokemonRow
-                    key={pokemon.id}
-                    pokemon={pokemon}
-                    onSelect={(pokemon) => setSelectedItem(pokemon)}
-                  />
-                ))}
-            </tbody>
-          </table>
-        </div>
-        {selectedItem && <PokemonInfo {...selectedItem} />  }
-      </TwoColumnLayout>
-    </Container>
-  );
+  render() {
+    return (
+      <Container
+      >
+        <Title Title>Pokemon Search</Title>
+        <TwoColumnLayout>
+          <div>
+          <Input value={this.state.filter} onChange={(e) => this.setState({
+            ...this.state,
+            filter: e.target.value
+            })} />
+            <table width="100%">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.pokemon
+                  .filter((pokemon) =>
+                    pokemon.name.english
+                      .toLowerCase()
+                      .includes(this.state.filter.toLocaleLowerCase())
+                  )
+                  .slice(0, 20)
+                  .map((pokemon) => (
+                    <PokemonRow
+                      key={pokemon.id}
+                      pokemon={pokemon}
+                      onSelect={(pokemon) => this.setState({
+                        ...this.state,
+                        selectedItem: pokemon
+                      })}
+                    />
+                  ))}
+              </tbody>
+            </table>
+          </div>
+          {this.state.selectedItem && <PokemonInfo {...this.state.selectedItem} />  }
+        </TwoColumnLayout>
+      </Container>
+    );
+  }
 }
+// useEffect(() => {
+//   fetch("http://localhost:3000/starting-react/pokemon.json").then((res) => res.json()).then((data) => setPokemon(data));
+// }, []);
 
 export default App;
